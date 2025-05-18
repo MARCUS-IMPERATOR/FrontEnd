@@ -1,14 +1,20 @@
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, Pressable } from 'react-native';
 import React from 'react';
+import { useNavigation } from 'expo-router';
 
 const Home = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Welcome Smayka</Text>
-      </View>
-    </SafeAreaView>
-  );
+  const nav = useNavigation()
+  return(
+    <Pressable onPress={()=>nav.navigate('ListCourses')}>
+      <SafeAreaView style = {styles.container}>
+        <View style = {styles.content}>
+          <Text style = {styles.title}>
+            Welcome Smayka
+          </Text>
+        </View>
+      </SafeAreaView>
+    </Pressable>
+  )
 };
 
 export default Home;
