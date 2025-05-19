@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import BottomMenu from '../components/bottomMenu';
-import { Icons } from '../constants/Icons';
+import { Icons } from '../constants/Icons'
 
 const categories = ['Tout', 'Mathematiques', 'Physique', 'Français'];
 
@@ -90,11 +90,11 @@ const ListCourses = () => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.connexionBtn}>
+        <TouchableOpacity style={styles.connexionBtn} onPress={() => router.push('./login')}>
           <Text style={styles.btnText}>Connexion</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.profBtn}>
-          <Text style={styles.btnText}>Prof</Text>
+          <Text style={[styles.btnText, { color: "hsla(0, 0%, 0%, 0.65)" }]}>Prof</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.searchBar}>
@@ -156,9 +156,11 @@ const styles = StyleSheet.create({
     borderRadius: 30
   },
   profBtn: { 
-    backgroundColor: '#D9D9D9', 
+    backgroundColor: '#D9D9D9',
     padding: 10, 
-    borderRadius: 30 
+    borderRadius: 30,
+    width:60,
+    textAlign:'left',
   },
   btnText: { 
     color: '#fff' 
