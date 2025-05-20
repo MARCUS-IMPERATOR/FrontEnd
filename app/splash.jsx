@@ -1,14 +1,14 @@
-import { StyleSheet, Text, View, Image } from 'react-native';
-import React, { useEffect } from 'react';
-import { useRouter } from 'expo-router';
-import logo from '../assets/img/logo.png';
+import { StyleSheet, Text, View, Image } from "react-native";
+import React, { useEffect } from "react";
+import { useRouter } from "expo-router";
+import logo from "../assets/img/logo.png";
 
 const SplashScreen = () => {
   const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace('/listCourses'); 
+      router.replace("/login");
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -28,23 +28,23 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#010080',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#010080",
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   logo: {
     width: 200,
     height: 200,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   appName: {
     marginTop: 20,
     fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
+    fontWeight: "bold",
+    color: "white",
   },
 });
