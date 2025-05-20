@@ -6,5 +6,6 @@ export const Icons = {
     professors : require('../assets/icons/professors.png'),
     srch : require('../assets/icons/search.png'),
     bookmark : require('../assets/icons/bookmark.png'),
-    placeHolder : require('../assets/icons/placeHolder.png')
+    placeHolder : require('../assets/icons/placeHolder.png'),
+    notif : require('../assets/icons/notif.png')
 }

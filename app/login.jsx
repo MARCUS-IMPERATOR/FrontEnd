@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -30,6 +31,12 @@ export default function Login() {
     try {
       const response = await axios.post('http://localhost:8080/login', { email, password });
       console.log('Login success:', response.data);
+      
+      const userData = response.data;
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
+      
+      router.push('/homePageStudent');
+      
       Alert.alert('Succès', 'Connexion réussie!');
     } catch (error) {
       let errorMessage = 'Une erreur est survenue. Veuillez réessayer.';

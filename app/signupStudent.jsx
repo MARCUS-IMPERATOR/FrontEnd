@@ -1,44 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
+import React, { useState } from 'react'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import axios from 'axios'
+import { useRouter } from 'expo-router'
 
 export default function SignUpStudent() {
-  const [prenom, setPrenom] = useState('');
-  const [nom, setNom] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errors, setErrors] = useState({});
+  const [prenom, setPrenom] = useState('')
+  const [nom, setNom] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [errors, setErrors] = useState({})
+  const router = useRouter()
 
   const validateForm = () => {
-    const err = {};
+    const err = {}
 
-    if (!prenom) err.prenom = 'Le prénom est requis';
-    if (!nom) err.nom = 'Le nom est requis';
+    if (!prenom) err.prenom = 'Le prénom est requis'
+    if (!nom) err.nom = 'Le nom est requis'
 
     if (!email) {
-      err.email = "L'email est requis";
+      err.email = "L'email est requis"
     } else if (!/\S+@\S+\.com$/.test(email)) {
-      err.email = "Format d'email invalide";
+      err.email = "Format d'email invalide"
     }
 
     if (!password) {
-      err.password = 'Le mot de passe est requis';
+      err.password = 'Le mot de passe est requis'
     }
 
     if (!confirmPassword) {
-      err.confirmPassword = 'Veuillez confirmer le mot de passe';
+      err.confirmPassword = 'Veuillez confirmer le mot de passe'
     } else if (password !== confirmPassword) {
-      err.confirmPassword = 'Les mots de passe ne correspondent pas';
+      err.confirmPassword = 'Les mots de passe ne correspondent pas'
     }
 
-    setErrors(err);
-    return Object.keys(err).length === 0;
-  };
+    setErrors(err)
+    return Object.keys(err).length === 0
+  }
 
   const handleSignUp = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) return
 
     try {
       const response = await axios.post('http://localhost:8080/signup', {
@@ -46,19 +48,19 @@ export default function SignUpStudent() {
         nom,
         email,
         password
-      });
-      console.log('Sign up success:', response.data);
-      Alert.alert('Succès', 'Inscription réussie !');
+      })
+      console.log('Sign up success:', response.data)
+      Alert.alert('Succès', 'Inscription réussie !')
     } catch (error) {
-      console.log('Error:', error.response?.data || error.message);
-      Alert.alert('Erreur', 'Une erreur est survenue. Veuillez réessayer.');
+      console.log('Error:', error.response?.data || error.message)
+      Alert.alert('Erreur', 'Une erreur est survenue. Veuillez réessayer.')
     }
-  };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <Image source={require('../assets/img/logoCol.png')} style={styles.logo} resizeMode="contain" />
-      <Text style={styles.welcomeText}>Créer un compte</Text>
+      <Text style={styles.welcomeText} onPress={()=> router.push('/homePageStudent')}>Créer un compte</Text>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Prénom</Text>
@@ -128,7 +130,7 @@ export default function SignUpStudent() {
         <Text style={styles.loginText}>S'inscrire</Text>
       </TouchableOpacity>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -188,4 +190,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-});
+})

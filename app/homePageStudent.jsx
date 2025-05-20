@@ -1,23 +1,38 @@
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, StatusBar, TextInput, Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, StatusBar, Image, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import BottomMenu from '../components/bottomMenu';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { useRouter } from 'expo-router';
-import BottomMenu from '../components/bottomMenu';
 import { Icons } from '../constants/Icons';
 import CourseCard from '../components/courseCard';
 
 const categories = ['Tout', 'Mathematiques', 'Physique', 'Français'];
 
-const ListCourses = () => {
+const HomePageStudent = () => {
   const [courses, setCourses] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(0);
   const [allCourses, setAllCourses] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [userData, setUserData] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
-    axios.get('http://localhost:8080/')
+    const getUserData = async () => {
+      try {
+        const storedUserData = await AsyncStorage.getItem('userData');
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData));
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+      }
+    };
+
+    getUserData();
+
+    axios.get('http://localhost:8080/courses')
       .then(response => {
         setCourses(response.data);
         setAllCourses(response.data);
@@ -31,7 +46,7 @@ const ListCourses = () => {
           reviews: '1.2K',
           price: '300 DH',
           subject: 'Mathematiques',
-          image: Icons.placeHolder
+          image: Icons?.placeHolder || 'https://via.placeholder.com/100x100.png?text=Video'
         });
         setCourses(dummy);
         setAllCourses(dummy);
@@ -42,14 +57,16 @@ const ListCourses = () => {
     let filteredCourses = JSON.parse(JSON.stringify(allCourses)); 
     if (selectedCategory !== 0) {
       const categ = categories[selectedCategory].toLowerCase();
-      filteredCourses = filteredCourses.filter(course => course.subject.toLowerCase() === categ);
+      filteredCourses = filteredCourses.filter(course => 
+        (course.subject || course.category).toLowerCase() === categ
+      );
     }
     if (searchText.trim() !== '') {
       const txt = searchText.toLowerCase().trim();
       filteredCourses = filteredCourses.filter(
         course => course.title.toLowerCase().includes(txt) || 
-                  course.teacher.toLowerCase().includes(txt) || 
-                  course.subject.toLowerCase().includes(txt)
+                  (course.teacher || course.instructor).toLowerCase().includes(txt) || 
+                  (course.subject || course.category).toLowerCase().includes(txt)
       );
     }
     setCourses(filteredCourses); 
@@ -70,14 +87,24 @@ const ListCourses = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <View style={styles.topBar}>
-        <TouchableOpacity style={styles.connexionBtn} onPress={() => router.push('./login')}>
-          <Text style={styles.btnText}>Connexion</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.profBtn}>
-          <Text style={[styles.btnText, { color: "hsla(0, 0%, 0%, 0.65)" }]}>Prof</Text>
-        </TouchableOpacity>
+      <View style={styles.header}>
+        <Text style={styles.greeting}>
+          Bonjour {userData?.name || userData?.firstName || userData?.username || 'Étudiant'} !
+        </Text>
+        <View style={styles.profileSection}>
+          <TouchableOpacity>
+            <Image 
+              source={Icons.notif} 
+              style={styles.icon} 
+            />
+          </TouchableOpacity>
+          <Image 
+            source= {require('../assets/img/studentProfile.jpg') }
+            style={styles.profileImage} 
+          />
+        </View>
       </View>
+      
       <View style={styles.searchBar}>
         <TextInput
           placeholder="Recherche"
@@ -86,9 +113,10 @@ const ListCourses = () => {
           onChangeText={handleSearch}
         />
         <TouchableOpacity onPress={filterCourses}>
-          <Image source={Icons.srch} style={styles.icon} />
+          <Image source={Icons?.srch || require('../assets/icons/search.png')} style={styles.icon} />
         </TouchableOpacity>
       </View>
+      
       <View style={styles.categories}>
         {categories.map((cat, i) => (
           <TouchableOpacity
@@ -100,7 +128,9 @@ const ListCourses = () => {
           </TouchableOpacity>
         ))}
       </View>
+      
       <Text style={styles.sectionTitle}>Formations Populaires</Text>
+      
       <FlatList
         data={courses}
         renderItem={({ item }) => <CourseCard course={item} />}
@@ -120,27 +150,26 @@ const styles = StyleSheet.create({
     padding: 10, 
     backgroundColor: '#fff' 
   },
-  topBar: { 
-    flexDirection: 'row', 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 10,
-    backgroundColor: '#D9D9D9',
-    borderRadius: 30,
-    width: 120
   },
-  connexionBtn: { 
-    backgroundColor: '#000080', 
-    padding: 10, 
-    borderRadius: 30
+  greeting: { 
+    fontSize: 18, 
+    fontWeight: 'bold',
+    color: "#0A3C53",
   },
-  profBtn: { 
-    backgroundColor: '#D9D9D9',
-    padding: 10, 
-    borderRadius: 30,
-    width: 60,
-    textAlign: 'left',
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  btnText: { 
-    color: '#fff' 
+  profileImage: { 
+    width: 40, 
+    height: 40, 
+    borderRadius: 20,
+    marginLeft: 10,
   },
   searchBar: {
     flexDirection: 'row',
@@ -159,7 +188,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     flexWrap: 'wrap', 
     marginBottom: 10,
-    color: "#0A3C53",
   },
   catBtn: { 
     backgroundColor: '#EAEAEA', 
@@ -189,4 +217,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ListCourses;
+export default HomePageStudent;
