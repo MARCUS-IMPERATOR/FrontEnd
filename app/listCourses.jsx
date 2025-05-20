@@ -129,11 +129,16 @@ const ListCourses = () => {
     <SafeAreaView style={styles.container} edges={["top"]}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.connexionBtn}>
+        <TouchableOpacity
+          style={styles.connexionBtn}
+          onPress={() => router.push("./login")}
+        >
           <Text style={styles.btnText}>Connexion</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.profBtn}>
-          <Text style={styles.btnText}>Prof</Text>
+          <Text style={[styles.btnText, { color: "hsla(0, 0%, 0%, 0.65)" }]}>
+            Prof
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.searchBar}>
@@ -168,7 +173,7 @@ const ListCourses = () => {
       <Text style={styles.sectionTitle}>Formations Populaires</Text>
       <FlatList
         data={courses}
-        renderItem={renderCourse}
+        renderItem={({ item }) => <CourseCard course={item} />}
         keyExtractor={(_, i) => i.toString()}
         ListEmptyComponent={
           <Text style={styles.catText}>
@@ -210,7 +215,6 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#fff",
   },
-
   searchBar: {
     flexDirection: "row",
     alignItems: "center",

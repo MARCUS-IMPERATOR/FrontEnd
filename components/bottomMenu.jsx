@@ -1,11 +1,11 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import React from 'react';
-import { useRouter } from 'expo-router';
-import { Image } from 'react-native';
-import { Icons } from '../constants/Icons';
+import { StyleSheet, View, TouchableOpacity } from 'react-native'
+import React from 'react'
+import { useRouter } from 'expo-router'
+import { Image } from 'react-native'
+import { Icons } from '../constants/Icons'
 
 const BottomMenu = () => {
-  const router = useRouter();
+  const router = useRouter()
   return (
     <View style={styles.bottomNav}>
       <TouchableOpacity onPress={() => router.push('/')}>
