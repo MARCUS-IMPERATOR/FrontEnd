@@ -38,7 +38,7 @@ export default function Login() {
 
     try {
       const response = await axios.get(
-        "http://100.77.45.42:8090/api/users/me",
+        "http://<...>:8090/api/users/me",
         {
           auth: {
             username: email,
@@ -66,7 +66,7 @@ export default function Login() {
         style={styles.logo}
         resizeMode="contain"
       />
-      <Text style={styles.welcomeText}>Content de vous revoir</Text>
+      <Text style={styles.welcomeText} onPress={() => { router.push('./courseList') }}>Content de vous revoir</Text>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
@@ -114,6 +114,7 @@ export default function Login() {
           Inscrivez-vous.
         </Text>
       </Text>
+      <Text style={styles.signupLaterText} onPress={()=>{router.push('./courseList')}}>S'inscrire plus tard</Text>
     </SafeAreaView>
   );
 }
@@ -190,6 +191,16 @@ const styles = StyleSheet.create({
   signupLink: {
     color: "#6C2BD9",
     fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  signupLaterText: {
+    position: 'absolute',
+    top: 30,
+    right: 20,
+    zIndex: 10,
+    color: "#0D3C4E",
+    fontSize: 14,
+    fontWeight: "500",
     textDecorationLine: "underline",
   },
 });

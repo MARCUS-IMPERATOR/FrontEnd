@@ -1,3 +1,6 @@
+// ListCourses.js
+
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,12 +11,13 @@ import {
   Image,
   TextInput,
 } from "react-native";
-import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import BottomMenu from "../components/bottomMenu";
 import { Icons } from "../constants/Icons";
+import { Colors } from "../constants/Colors";
+import CourseCard from "../components/courseCard";
 
 const categories = ["Tout", "Mathematiques", "Physique", "Français"];
 
@@ -40,10 +44,12 @@ const ListCourses = () => {
         console.error("There was an error fetching the courses!", error);
         const dummy = Array(4).fill({
           title: "2 BAC SM BIOF Math Teacher",
-          teacher: "Pr. Arddour",
-          rating: "5.0",
-          reviews: "1.2K",
-          price: "300 DH",
+          professor: { 
+            lastName: "Arddour", 
+            specialisation: "Mathematiques" 
+          },
+          rating: 5.0,
+          numberOfReviews: 1200,
           subject: "Mathematiques",
           image: Icons.placeHolder,
         });
@@ -53,23 +59,27 @@ const ListCourses = () => {
   }, []);
 
   const filterCourses = () => {
-    let filteredCourses = JSON.parse(JSON.stringify(allCourses));
+    let filtered = [...allCourses];
+
     if (selectedCategory !== 0) {
       const categ = categories[selectedCategory].toLowerCase();
-      filteredCourses = filteredCourses.filter(
+      filtered = filtered.filter(
         (course) => course.subject.toLowerCase() === categ
       );
     }
+
     if (searchText.trim() !== "") {
       const txt = searchText.toLowerCase().trim();
-      filteredCourses = filteredCourses.filter(
+      filtered = filtered.filter(
         (course) =>
           course.title.toLowerCase().includes(txt) ||
-          course.teacher.toLowerCase().includes(txt) ||
+          (course.professor &&
+            course.professor.lastName.toLowerCase().includes(txt)) ||
           course.subject.toLowerCase().includes(txt)
       );
     }
-    setCourses(filteredCourses);
+
+    setCourses(filtered);
   };
 
   useEffect(() => {
@@ -84,45 +94,14 @@ const ListCourses = () => {
     setSelectedCategory(index);
   };
 
-  const renderStars = (rating) => {
-    const fullStars = Math.floor(rating);
-    const halfStar = rating - fullStars >= 0.5;
-    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-    return (
-      <>
-        {Array(fullStars)
-          .fill()
-          .map((_, i) => (
-            <Text key={`full-${i}`}>★</Text>
-          ))}
-        {halfStar && <Text key="half">½</Text>}
-        {Array(emptyStars)
-          .fill()
-          .map((_, i) => (
-            <Text key={`empty-${i}`}>☆</Text>
-          ))}
-      </>
-    );
-  };
-
   const renderCourse = ({ item }) => (
-    <View style={styles.card}>
-      <Image
-        source={{
-          uri: `http://<...>:8090/api/courses/${item.id}/thumbnail`,
-        }}
-        style={styles.image}
-      />
-      <View style={styles.info}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.teacher}>Avec Pr. {item.professor.lastName}</Text>
-        <Text style={styles.rating}>
-          {item.rating} {renderStars(item.rating)} ({item.numberOfReviews})
-        </Text>
-        <Text style={styles.subject}>{item.professor.specialisation}</Text>
-      </View>
-    </View>
+    <CourseCard
+      title={item.title}
+      professor={item.professor}
+      rating={item.rating}
+      numberOfReviews={item.numberOfReviews}
+      imageSource={Icons.thumb}
+    />
   );
 
   return (
@@ -165,7 +144,9 @@ const ListCourses = () => {
           </TouchableOpacity>
         ))}
       </View>
+
       <Text style={styles.sectionTitle}>Formations Populaires</Text>
+
       <FlatList
         data={courses}
         renderItem={renderCourse}
@@ -176,6 +157,7 @@ const ListCourses = () => {
           </Text>
         }
       />
+
       <BottomMenu />
     </SafeAreaView>
   );
@@ -187,13 +169,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: "#fff",
+    backgroundColor: Colors.backgroundColor,
   },
-
   topBar: {
     flexDirection: "row",
     marginBottom: 10,
-    backgroundColor: "#D9D9D9",
+    backgroundColor: Colors.lightGrey,
     borderRadius: 30,
     width: 120,
   },
@@ -203,14 +184,13 @@ const styles = StyleSheet.create({
     borderRadius: 30,
   },
   profBtn: {
-    backgroundColor: "#D9D9D9",
+    backgroundColor: Colors.lightGrey,
     padding: 10,
     borderRadius: 30,
   },
   btnText: {
     color: "#fff",
   },
-
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -224,12 +204,15 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
   },
-
+  icon: {
+    width: 24,
+    height: 24,
+    resizeMode: "contain",
+  },
   categories: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginBottom: 10,
-    color: "#0A3C53",
   },
   catBtn: {
     backgroundColor: "#EAEAEA",
@@ -246,60 +229,10 @@ const styles = StyleSheet.create({
   catTextActive: {
     color: "#fff",
   },
-
   sectionTitle: {
     fontSize: 24,
     fontWeight: "bold",
     color: "black",
     marginVertical: 10,
-  },
-
-  card: {
-    flexDirection: "row",
-    marginBottom: 10,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
-    paddingBottom: 10,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginRight: 10,
-  },
-  icon: {
-    width: 24,
-    height: 24,
-    resizeMode: "contain",
-  },
-  info: {
-    flex: 1,
-  },
-  title: {
-    fontWeight: "bold",
-  },
-  teacher: {
-    color: "#444",
-  },
-  rating: {
-    color: "orange",
-  },
-  subject: {
-    color: "#E1341E",
-    fontWeight: "bold",
-  },
-  cardFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 5,
-  },
-  button: {
-    backgroundColor: "#1976D2",
-    padding: 8,
-    borderRadius: 6,
-  },
-  buttonText: {
-    color: "#fff",
   },
 });

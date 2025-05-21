@@ -1,78 +1,92 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, View, Text, Image } from 'react-native';
+import { Colors } from '../constants/Colors';
 import { Icons } from '../constants/Icons';
 
-const CourseCard = ({ course }) => {
+const CourseCard = ({ title, professor, rating, numberOfReviews, imageSource }) => {
+  const renderStars = (ratingValue) => {
+    const fullStars = Math.floor(ratingValue);
+    const halfStar = ratingValue - fullStars >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    return (
+      <>
+        {Array(fullStars)
+          .fill()
+          .map((_, i) => (
+            <Text key={`full-${i}`} style={styles.star}>★</Text>
+          ))}
+        {halfStar && <Text key="half" style={styles.star}>½</Text>}
+        {Array(emptyStars)
+          .fill()
+          .map((_, i) => (
+            <Text key={`empty-${i}`} style={styles.star}>☆</Text>
+          ))}
+      </>
+    );
+  };
+
   return (
     <View style={styles.card}>
-      <Image source={course.image} style={styles.image} />
+      <Image
+        source={imageSource || Icons.thumb}
+        style={styles.image}
+      />
       <View style={styles.info}>
-        <Text style={styles.title}>{course.title}</Text>
-        <Text style={styles.teacher}>Avec {course.teacher}</Text>
-        <Text style={styles.rating}>
-          {course.rating} ★★★★☆ ({course.reviews})
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.teacher}>
+          Avec Pr. {professor ? professor.lastName : 'Inconnu'}
         </Text>
-        <Text style={styles.subject}>{course.subject}</Text>
-        <View style={styles.cardFooter}>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>s'inscrire</Text>
-          </TouchableOpacity>
-          <Image source={Icons.bookmark} style={styles.icon} />
-        </View>
+        <Text style={styles.subject}>
+          {professor ? professor.specialisation : 'Spécialité inconnue'}
+        </Text>
+        <Text style={styles.rating}>
+          {rating} {renderStars(rating)} ({numberOfReviews})
+        </Text>
       </View>
     </View>
   );
 };
 
+export default CourseCard;
+
 const styles = StyleSheet.create({
-  card: { 
-    flexDirection: 'row', 
-    marginBottom: 10, 
-    borderBottomWidth: 1, 
-    borderColor: '#eee', 
-    paddingBottom: 10 
+  card: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    paddingBottom: 10,
   },
-  image: { 
-    width: 100, 
-    height: 100, 
-    borderRadius: 8, 
-    marginRight: 10 
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginRight: 10,
   },
-  icon: {
-    width: 24,
-    height: 24,
-    resizeMode: 'contain'
+  info: {
+    flex: 1,
   },
-  info: { 
-    flex: 1 
+  title: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#000',
   },
-  title: { 
-    fontWeight: 'bold' 
+  teacher: {
+    color: '#444',
+    marginTop: 4,
   },
-  teacher: { 
-    color: '#444' 
+  subject: {
+    color: '#E1341E',
+    fontWeight: 'bold',
+    marginTop: 2,
   },
-  rating: { 
-    color: 'orange' 
+  rating: {
+    color: 'orange',
+    marginTop: 2,
   },
-  subject: { 
-    color: 'red', 
-    fontWeight: 'bold' 
-  },
-  cardFooter: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginTop: 5 
-  },
-  button: { 
-    backgroundColor: '#000080', 
-    padding: 8, 
-    borderRadius: 6 
-  },
-  buttonText: { 
-    color: '#fff' 
+  star: {
+    fontSize: 14,
+    color: 'orange',
   },
 });
-
-export default CourseCard;
