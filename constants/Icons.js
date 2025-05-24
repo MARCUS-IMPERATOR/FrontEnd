@@ -7,5 +7,12 @@ export const Icons = {
   srch: require("../assets/icons/search.png"),
   bookmark: require("../assets/icons/bookmark.png"),
   placeHolder: require("../assets/icons/placeHolder.png"),
-  thumb: require("../assets/icons/thumb.jpg")
+  thumb: require("../assets/icons/thumb.jpg"),
+  notif: require("../assets/icons/notif1.png"),
+  plus: require("../assets/icons/plus.png"),
+  students: require("../assets/icons/students.png"),
+  avatar: require("../assets/icons/avatar.png"),
+  circAdd: require("../assets/icons/circAdd.png"),
+  pdf: require("../assets/icons/pdf2.png"),
+  video: require("../assets/icons/video.png")
 };

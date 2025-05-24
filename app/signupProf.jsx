@@ -18,6 +18,7 @@ export default function SignUpStudent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [specilite, setSpecilite] = useState("");
   const [errors, setErrors] = useState({});
   const router = useRouter();
 
@@ -42,6 +43,9 @@ export default function SignUpStudent() {
     } else if (password !== confirmPassword) {
       err.confirmPassword = "Les mots de passe ne correspondent pas";
     }
+    if (!specilite) {
+      err.specilite = "La specialite est requise"
+    }
 
     setErrors(err);
     return Object.keys(err).length === 0;
@@ -56,7 +60,7 @@ export default function SignUpStudent() {
         lastName: nom,
         email: email,
         password: password,
-        role: "STUDENT",
+        role: "TEACHER",
       });
 
       console.log("Sign up success:", response.data);
@@ -147,6 +151,17 @@ export default function SignUpStudent() {
         {errors.confirmPassword && (
           <Text style={styles.errorText}>{errors.confirmPassword}</Text>
         )}
+      </View>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Specialite</Text>
+        <TextInput
+          placeholder="Mathematique"
+          placeholderTextColor="#aaa"
+          style={[styles.input, errors.specilite && styles.inputError]}
+          value={specilite}
+          onChangeText={setSpecilite}
+        />
+        {errors.specilite && <Text style={styles.errorText}>{errors.specilite}</Text>}
       </View>
 
       <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>

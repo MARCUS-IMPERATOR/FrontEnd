@@ -33,10 +33,10 @@ const styles = StyleSheet.create({
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    padding: 0,
+    paddingVertical: 3,
+    borderTopWidth: 1,
+    borderColor: '#eee',
     backgroundColor: '#fff',
-    alignItems: 'center',
-    height:30,
   },
   iconStyles: {
     width: 35,

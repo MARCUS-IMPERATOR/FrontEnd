@@ -11,59 +11,51 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function SignUpStudent() {
-  const [prenom, setPrenom] = useState("");
-  const [nom, setNom] = useState("");
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({});
   const router = useRouter();
 
   const validateForm = () => {
     const err = {};
-
-    if (!prenom) err.prenom = "Le prénom est requis";
-    if (!nom) err.nom = "Le nom est requis";
-
     if (!email) {
       err.email = "L'email est requis";
     } else if (!/\S+@\S+\.com$/.test(email)) {
       err.email = "Format d'email invalide";
     }
-
     if (!password) {
       err.password = "Le mot de passe est requis";
     }
-
-    if (!confirmPassword) {
-      err.confirmPassword = "Veuillez confirmer le mot de passe";
-    } else if (password !== confirmPassword) {
-      err.confirmPassword = "Les mots de passe ne correspondent pas";
-    }
-
     setErrors(err);
     return Object.keys(err).length === 0;
   };
 
-  const handleSignUp = async () => {
+  const handleLogin = async () => {
     if (!validateForm()) return;
 
     try {
-      const response = await axios.post("http://<...>:8090/api/users", {
-        firstName: prenom,
-        lastName: nom,
-        email: email,
-        password: password,
-        role: "STUDENT",
-      });
+      const response = await axios.get(
+        "http://<...>:8090/api/users/me",
+        {
+          auth: {
+            username: email,
+            password: password,
+          },
+        }
+      );
 
-      console.log("Sign up success:", response.data);
-      Alert.alert("Succès", "Inscription réussie !");
+      console.log("Login success:", response.data);
+      await AsyncStorage.setItem("userEmail", email);
+      await AsyncStorage.setItem("userPassword", password);
+
+      router.push("/homePageStudent");
+      Alert.alert("Succès", "Connexion réussie!");
     } catch (error) {
       console.log("Error:", error.response?.data || error.message);
-      Alert.alert("Erreur", "Une erreur est survenue. Veuillez réessayer.");
+      Alert.alert("Erreur", "Email ou mot de passe incorrect");
     }
   };
 
@@ -74,47 +66,18 @@ export default function SignUpStudent() {
         style={styles.logo}
         resizeMode="contain"
       />
-      <Text
-        style={styles.welcomeText}
-        onPress={() => router.push("/homePageStudent")}
-      >
-        Créer un compte
-      </Text>
-
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Prénom</Text>
-        <TextInput
-          placeholder="john"
-          placeholderTextColor="#aaa"
-          style={[styles.input, errors.prenom && styles.inputError]}
-          value={prenom}
-          onChangeText={setPrenom}
-        />
-        {errors.prenom && <Text style={styles.errorText}>{errors.prenom}</Text>}
-      </View>
-
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Nom</Text>
-        <TextInput
-          placeholder="Doe"
-          placeholderTextColor="#aaa"
-          style={[styles.input, errors.nom && styles.inputError]}
-          value={nom}
-          onChangeText={setNom}
-        />
-        {errors.nom && <Text style={styles.errorText}>{errors.nom}</Text>}
-      </View>
+      <Text style={styles.welcomeText} onPress={() => { router.push('./courseList') }}>Content de vous revoir</Text>
 
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
         <TextInput
-          placeholder="john.doe@gmail.com"
+          placeholder="johndoe@gmail.com"
           placeholderTextColor="#aaa"
-          keyboardType="email-address"
-          autoCapitalize="none"
           style={[styles.input, errors.email && styles.inputError]}
+          keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
+          autoCapitalize="none"
         />
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
       </View>
@@ -124,8 +87,8 @@ export default function SignUpStudent() {
         <TextInput
           placeholder="*****"
           placeholderTextColor="#aaa"
-          secureTextEntry
           style={[styles.input, errors.password && styles.inputError]}
+          secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
@@ -134,24 +97,21 @@ export default function SignUpStudent() {
         )}
       </View>
 
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Confirmer le mot de passe</Text>
-        <TextInput
-          placeholder="*****"
-          placeholderTextColor="#aaa"
-          secureTextEntry
-          style={[styles.input, errors.confirmPassword && styles.inputError]}
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
-        {errors.confirmPassword && (
-          <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-        )}
-      </View>
-
-      <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>
-        <Text style={styles.loginText}>S'inscrire</Text>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Text style={styles.loginText}>Se connecter</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => router.push("#")}>
+        <Text style={styles.forgotPassword}>Mot de passe oublié ?</Text>
+      </TouchableOpacity>
+
+      <Text style={styles.signupText}>
+        Nouveau ici ?{" "}
+        <Text style={styles.signupLaterText} onPress={() => router.push("/signupProf")}>
+          Inscrivez-vous.
+        </Text>
+      </Text>
+      <Text style={styles.signupLaterText} onPress={()=>{router.push('./courseList')}}>S'inscrire plus tard</Text>
     </SafeAreaView>
   );
 }
@@ -212,5 +172,32 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  forgotPassword: {
+    color: "#0D3C4E",
+    textAlign: "center",
+    marginTop: 12,
+    textDecorationLine: "underline",
+  },
+  signupText: {
+    marginTop: 40,
+    textAlign: "center",
+    color: "#888",
+    fontSize: 14,
+  },
+  signupLink: {
+    color: "#6C2BD9",
+    fontWeight: "600",
+    textDecorationLine: "underline",
+  },
+  signupLaterText: {
+    position: 'absolute',
+    top: 30,
+    right: 20,
+    zIndex: 10,
+    color: "#0D3C4E",
+    fontSize: 14,
+    fontWeight: "500",
+    textDecorationLine: "underline",
   },
 });

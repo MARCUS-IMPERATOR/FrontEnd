@@ -1,5 +1,3 @@
-// ListCourses.js
-
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -30,7 +28,7 @@ const ListCourses = () => {
 
   useEffect(() => {
     axios
-      .get("http://<...>:8090/api/courses/all", {
+      .get("http://192.168.10.1:8090/api/courses/all", {
         auth: {
           username: "jane@example.com",
           password: "wafae1234",
@@ -42,7 +40,7 @@ const ListCourses = () => {
       })
       .catch((error) => {
         console.error("There was an error fetching the courses!", error);
-        const dummy = Array(4).fill({
+        const dummy = Array(10).fill({
           title: "2 BAC SM BIOF Math Teacher",
           professor: { 
             lastName: "Arddour", 
@@ -109,9 +107,9 @@ const ListCourses = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       <View style={styles.topBar}>
         <TouchableOpacity style={styles.connexionBtn}>
-          <Text style={styles.btnText}>Connexion</Text>
+          <Text style={styles.btnText}>Etudiant</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.profBtn}>
+        <TouchableOpacity style={styles.profBtn} onPress={()=>{router.push("./profDashboard")}}>
           <Text style={styles.btnText}>Prof</Text>
         </TouchableOpacity>
       </View>

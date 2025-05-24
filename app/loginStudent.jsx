@@ -107,10 +107,7 @@ export default function Login() {
 
       <Text style={styles.signupText}>
         Nouveau ici ?{" "}
-        <Text
-          style={styles.signupLink}
-          onPress={() => router.push("/signupStudent")}
-        >
+        <Text style={styles.signupLaterText} onPress={() => router.push("/signupStudent")}>
           Inscrivez-vous.
         </Text>
       </Text>
