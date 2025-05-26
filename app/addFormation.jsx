@@ -168,7 +168,7 @@ const AddFormation = ({ navigation, onSubmit }) => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.header} onPress={()=>{router.push('profFormation')}}>Ajouter une nouvelle formation</Text>
+        <Text style={styles.header} onPress={()=>{router.push('./profFormation')}}>Ajouter une nouvelle formation</Text>
         
         <View style={styles.inputGroup}>
           <Text style={styles.label}>

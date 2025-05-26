@@ -1,11 +1,36 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'expo-router'
 import { Image } from 'react-native'
 import { Icons } from '../constants/Icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const BottomMenu = () => {
   const router = useRouter()
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const getUserRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem('role');
+        if (role !== null) {
+          setUserRole(role);
+        }
+      } catch (error) {
+        console.error('Failed to load user role from AsyncStorage', error);
+      }
+    };
+
+    getUserRole();
+  }, []);
+
+  const handleAccount = () => {
+    if (userRole === 'TEACHER') {
+      router.push('./accountProf');
+    } else {
+      router.push('/accountStudent');
+    }
+  };
   return (
     <View style={styles.bottomNav}>
       <TouchableOpacity onPress={() => router.push('/')}>
@@ -20,7 +45,7 @@ const BottomMenu = () => {
       <TouchableOpacity>
         <Image source={Icons.chat} style={styles.iconStyles} resizeMode="contain"/>
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={()=>{handleAccount()}}>
         <Image source={Icons.account} style={styles.iconStyles} resizeMode="contain"/>
       </TouchableOpacity>
     </View>

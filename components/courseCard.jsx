@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Image } from 'react-native';
 import { Colors } from '../constants/Colors';
 import { Icons } from '../constants/Icons';
+import { router } from 'expo-router';
 
 const CourseCard = ({ title, professor, rating, numberOfReviews, imageSource }) => {
   const renderStars = (ratingValue) => {
@@ -33,7 +34,7 @@ const CourseCard = ({ title, professor, rating, numberOfReviews, imageSource }) 
         style={styles.image}
       />
       <View style={styles.info}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title} onPress={()=>{router.push('./checkout')}}>{title}</Text>
         <Text style={styles.teacher}>
           Avec Pr. {professor ? professor.lastName : 'Inconnu'}
         </Text>
