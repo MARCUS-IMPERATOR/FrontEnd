@@ -8,7 +8,7 @@ const SplashScreen = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace("/selectRole");
+      router.replace("/courseList");
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -35,10 +35,11 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 30
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 300,
+    height: 300,
     resizeMode: "contain",
   },
   appName: {

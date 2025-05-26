@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
     width: 120,
   },
   connexionBtn: {
-    backgroundColor: "#1976D2",
+    backgroundColor: "#000080",
     padding: 10,
     borderRadius: 30,
   },
@@ -219,13 +219,17 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   catActive: {
-    backgroundColor: "#1976D2",
+    backgroundColor: "#000080",
   },
   catText: {
     color: "#000",
+    fontSize: 14,
+    
   },
   catTextActive: {
     color: "#fff",
+    fontWeight: 'bold',
+    
   },
   sectionTitle: {
     fontSize: 24,

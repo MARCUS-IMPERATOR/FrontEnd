@@ -10,13 +10,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const { redirectTo, itemId } = useLocalSearchParams();
   const router = useRouter();
 
   const validateForm = () => {
@@ -48,10 +51,20 @@ export default function Login() {
       );
 
       console.log("Login success:", response.data);
-      await AsyncStorage.setItem("userEmail", email);
-      await AsyncStorage.setItem("userPassword", password);
+      // await AsyncStorage.setItem("userEmail", email);
+      // await AsyncStorage.setItem("userPassword", password);
+      await login(email, password);
 
-      router.push("/homePageStudent");
+      if (redirectTo) {
+        router.replace({
+          pathname: `/${redirectTo}`,
+          params: { id: itemId }
+        });
+      } else {
+        router.replace('/homePageStudent');
+      }
+
+      // router.push("/homePageStudent");
       Alert.alert("Succès", "Connexion réussie!");
     } catch (error) {
       console.log("Error:", error.response?.data || error.message);
@@ -107,7 +120,10 @@ export default function Login() {
 
       <Text style={styles.signupText}>
         Nouveau ici ?{" "}
-        <Text style={styles.signupLaterText} onPress={() => router.push("/signupStudent")}>
+        <Text
+          style={styles.signupLink}
+          onPress={() => router.push("/signupStudent")}
+        >
           Inscrivez-vous.
         </Text>
       </Text>

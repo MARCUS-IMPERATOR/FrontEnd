@@ -8,10 +8,10 @@ const BottomMenu = () => {
   const router = useRouter()
   return (
     <View style={styles.bottomNav}>
-      <TouchableOpacity onPress={() => router.push('/')}>
+      <TouchableOpacity onPress={() => router.push('/courseList')}>
         <Image source={Icons.home} style={styles.iconStyles} resizeMode="contain"/>
       </TouchableOpacity>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => router.push('/profList')}>
         <Image source={Icons.professors} style={styles.iconStyles} resizeMode="contain"/>
       </TouchableOpacity>
       <TouchableOpacity>
