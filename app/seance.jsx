@@ -46,12 +46,7 @@ const SeanceScreen = () => {
     ]
   });
 
-  const handleDocumentPress = (docId) => {
-    console.log('Open document:', docId);
-    // Implement document opening logic here
-  };
 
-  // Loading state
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
@@ -110,7 +105,7 @@ const SeanceScreen = () => {
                 key={doc.id} 
                 style={styles.documentCard}
                 onPress={() => router.push({
-                  pathname: 'pdfviewer',
+                  pathname: 'pdfvoir',
                   params: {
                     title: doc.title,
                     url: doc.url,

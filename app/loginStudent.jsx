@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from '../contexts/AuthContext';
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login , logout} = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -50,10 +50,18 @@ export default function Login() {
         }
       );
 
+      const userData = {
+        id: response.data.id,
+        email: email,
+        name: response.data.name || email.split('@')[0],
+        token: response.headers['authorization'] // If using token-based auth
+      };
+
+      await login(userData);
+
       console.log("Login success:", response.data);
-      // await AsyncStorage.setItem("userEmail", email);
-      // await AsyncStorage.setItem("userPassword", password);
-      await login(email, password);
+
+      Alert.alert("Succès", "Connexion réussie!");
 
       if (redirectTo) {
         router.replace({
@@ -64,8 +72,7 @@ export default function Login() {
         router.replace('/homePageStudent');
       }
 
-      // router.push("/homePageStudent");
-      Alert.alert("Succès", "Connexion réussie!");
+      
     } catch (error) {
       console.log("Error:", error.response?.data || error.message);
       Alert.alert("Erreur", "Email ou mot de passe incorrect");

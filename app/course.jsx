@@ -1,81 +1,136 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 
 const CourseScreenDetails = () => {
   const [course, setCourse] = useState({});
   const [seances, setSeances] = useState([]);
-  // const {isLoggedIn} = useAuth();
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [students, setStudents] = useState([]);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [imageProfError, setImageProfError] = useState(false);
+  const { isLoading, user, login, logout } = useAuth();
+  const { 
+    courseId, 
+    title: paramTitle, 
+    professor: paramProfessor, 
+    price: paramPrice,
+    thumbnail: paramThumbnail 
+  } = useLocalSearchParams();
+  const isLoggedIn = true; 
+
   const router = useRouter();
 
   useEffect(() => {
+    const fetchCourseData = async () => {
+      try {
+        if (courseId) {
+          const response = await axios.get(`/api/courses/${courseId}`);
+          const seancesWithDocuments = response.data.seances.map(seance => ({
+            ...seance,
+            documents: response.data.supports.filter(s => s.seanceId === seance.id)
+          }));
 
-    axios.get('/api/course-details')
-      .then((response) => {
-        const seancesWithDocuments = response.data.seances.map(seance => ({
-          ...seance,
-          documents: response.data.supports.filter(s => s.seanceId === seance.id)
-        }));
-
-        setCourse(response.data.course);
-        setSeances(seancesWithDocuments);
-      })
-      .catch((error) => {
-        console.error('Error fetching course data:', error);
-        // Dummy data
-        const dummyCourse = {
-          id: 1,
-          title: "2 BAC SM BIOF PHYSIQUE",
-          professor: {
+          setCourse(response.data.course);
+          setSeances(seancesWithDocuments);
+          
+          if (isLoggedIn && user) {
+            const subscriptionResponse = await axios.get(`/api/subscriptions?userId=${user.id}&courseId=${courseId}`);
+            setIsSubscribed(subscriptionResponse.data.isSubscribed);
+          }
+        } else {
+          // Use dummy data with params if available
+          const parsedProfessor = paramProfessor ? JSON.parse(paramProfessor) : {
+            id: "1",
             firstName: "Pr.",
-            lastName: "Laaouani"
-          },
-          rating: 4.3,
-          numberOfReviews: "1.2K",
-          price: "300",
-          subject: "Physique",
-          description: "Plongez au cœur des ondes lumineuses à travers une formation complète et interactive animée par le professeur Laaouani, expert en physique pour le niveau baccalauréat. Cette session est conçue spécialement pour les étudiants en filière Sciences Mathématiques option BIOF.",
-          dates: [
-            { day: "Lundi", time: "18h30 – 21h00" },
-            { day: "Mercredi", time: "18h30 – 21h00" },
-            { day: "Vendredi", time: "18h30 – 21h00" },
-          ],
-          thumbnail: require('../assets/img/hq720.jpg')
-        };
-        const dummySeances = [
-          { id: 1, title: "Seance 1", date: "13/9/2024", duration: "23:00", videoUrl: "",img: require("../assets/img/hq720.jpg"),documents: [  
-            { id: 1, title: "Introduction", type: "pdf" , url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"},
-            { id: 2, title: "Exercices", type: "pdf" , url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"}
-          ] },
-          { id: 2, title: "Seance 2", date: "15/9/2024", duration: "23:00", videoUrl: "" ,img: require("../assets/img/hq720.jpg"),
-            documents: [  
-            { id: 1, title: "Introduction", type: "pdf", url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
-            { id: 2, title: "Exercices", type: "pdf",url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-          ]
-          },
-          { id: 3, title: "Seance 3", date: "17/9/2024", duration: "23:00", videoUrl: "",img: require("../assets/img/hq720.jpg"), documents: [ 
-            { id: 1, title: "Introduction", type: "pdf",url:"" },
-            { id: 2, title: "Exercices", type: "pdf",url:"" }
-          ] },
-          { id: 4, title: "Seance 4", date: "11/9/2024", duration: "23:00", videoUrl: "" ,img: require("../assets/img/hq720.jpg"), documents: [  
-            { id: 1, title: "Introduction", type: "pdf",url:""},
-            { id: 2, title: "Exercices", type: "pdf",url:"" }
-          ]}
-        ];
-        
-        setCourse(dummyCourse);
-        setSeances(dummySeances);
-        setSupports(dummySeances.documents);
-      });
-  }, []);
+            lastName: "Laaouani",
+            imageUrl: "https://example.com/professors/1.jpg"
+          };
 
-  
+          const dummyCourse = {
+            id: courseId || 1,
+            title: paramTitle || "2 BAC SM BIOF PHYSIQUE",
+            professor: parsedProfessor,
+            rating: 4.3,
+            numberOfReviews: "1.2K",
+            price: paramPrice || "300",
+            subject: "Physique",
+            description: "Plongez au cœur des ondes lumineuses à travers une formation complète et interactive animée par le professeur Laaouani, expert en physique pour le niveau baccalauréat. Cette session est conçue spécialement pour les étudiants en filière Sciences Mathématiques option BIOF.",
+            dates: [
+              { day: "Lundi", time: "18h30 – 21h00" },
+              { day: "Mercredi", time: "18h30 – 21h00" },
+              { day: "Vendredi", time: "18h30 – 21h00" },
+            ],
+            thumbnail: paramThumbnail ? { uri: paramThumbnail } : require('../assets/img/hq720.jpg')
+          };
+
+          const dummySeances = [
+            { id: 1, title: "Seance 1", date: "13/9/2024", duration: "23:00", 
+              videoUrl: "", img: require("../assets/img/hq720.jpg"), documents: [  
+                { id: 1, title: "Introduction", type: "pdf", url:"https://www.adobe.com/support/products/enterprise/knowledgecenter/media/c4611_sample_explain.pdf"},
+                { id: 2, title: "Exercices", type: "pdf", url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"}
+              ] 
+            },
+            { id: 2, title: "Seance 2", date: "15/9/2024", duration: "23:00", videoUrl: "", img: require("../assets/img/hq720.jpg"), documents: [  
+              { id: 1, title: "Introduction", type: "pdf", url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" },
+              { id: 2, title: "Exercices", type: "pdf", url:"https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
+            ]},
+            { id: 3, title: "Seance 3", date: "17/9/2024", duration: "23:00", videoUrl: "", img: require("../assets/img/hq720.jpg"), documents: [ 
+              { id: 1, title: "Introduction", type: "pdf", url:"" },
+              { id: 2, title: "Exercices", type: "pdf", url:"" }
+            ] },
+            { id: 4, title: "Seance 4", date: "11/9/2024", duration: "23:00", videoUrl: "", img: require("../assets/img/hq720.jpg"), documents: [  
+              { id: 1, title: "Introduction", type: "pdf", url:""},
+              { id: 2, title: "Exercices", type: "pdf", url:"" }
+            ]}
+          ];
+
+          // Dummy students data
+          const dummyStudents = [
+            {
+              id: 1,
+              name: "Ahmed Benali",
+              avatar: "https://randomuser.me/api/portraits/men/1.jpg"
+            },
+            {
+              id: 2,
+              name: "Fatima Zahra",
+              avatar: "https://randomuser.me/api/portraits/women/1.jpg"
+            },
+            {
+              id: 3,
+              name: "Mehdi El",
+              avatar: "https://randomuser.me/api/portraits/men/2.jpg"
+            },
+            {
+              id: 4,
+              name: "Amina Karima",
+              avatar: "https://randomuser.me/api/portraits/women/2.jpg"
+            },
+            {
+              id: 5,
+              name: "Amina Karima",
+              avatar: null
+            }
+          ];
+
+          setStudents(dummyStudents);    
+          setCourse(dummyCourse);
+          setSeances(dummySeances);
+          setIsSubscribed(true); // Default to not subscribed
+        }
+      } catch (error) {
+        console.error('Error fetching course data:', error);
+      }
+    };
+
+    fetchCourseData();
+  }, [courseId, paramTitle, paramProfessor, paramPrice, paramThumbnail, isLoggedIn, user]);
+
   const renderStars = (rating) => {
-
     const safeRating = Math.min(Math.max(Number(rating) || 0, 5));
     const fullStars = Math.floor(safeRating);
     const hasHalfStar = safeRating - fullStars >= 0.5;
@@ -94,104 +149,80 @@ const CourseScreenDetails = () => {
     );
   };
 
-  // Function to handle press on seance or subscription button or support de cours
-  const handlePress = (item, { 
-    type = 'access',
-    resourceName = 'cette ressource',
-    targetScreen = null
-  } = {}) => {
-    if (isLoggedIn) {
-      // If logged in, navigate directly to the target screen
-      if (targetScreen) {
-        const baseParams = {
-          id: item.id,
-          title: item.title,
-        };
-
-        // Add specific params based on target screen
-        const screenParams = {
-          seance: {
-            ...baseParams,
-            videoUrl: item.videoUrl,
-            date: item.date,
-            duration: item.duration,
-            description: item.description
-          },
-          pdfviewer: {
-            ...baseParams,
-            url: item.url,
-            type: item.type || 'pdf'
-          },
-          checkout: {
-            ...baseParams,
-            price: item.price,
-            professor: item.professor,
-            thumbnail: item.thumbnail
-
-          }, 
-        };
-
-        router.push({
-          pathname: targetScreen,
-          params: screenParams[targetScreen] || baseParams
-        });
-      }
+  const handleAction = (item, type, targetScreen) => {
+    if (!isLoggedIn) {
+      Alert.alert(
+        'Connexion requise',
+        'Veuillez vous connecter pour accéder à cette fonctionnalité',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { 
+            text: 'Se connecter', 
+            onPress: () => router.push({
+              pathname: '/loginStudent',
+              params: { 
+                redirectTo: 'course', 
+                itemId: course.id 
+              }
+            }) 
+          }
+        ]
+      );
       return;
     }
 
-    const messages = {
-      subscription: `Veuillez vous connecter pour vous inscrire à ce cours.`,
-      seance: `Veuillez vous connecter pour accéder à la séance "${item.title}".`,
-      support: `Veuillez vous connecter pour accéder au support "${item.title}".`,
-      access: `Veuillez vous connecter pour accéder à ${resourceName}.`
-    };
+    if (!isSubscribed && type !== 'subscription') {
+      Alert.alert(
+        'Abonnement requis',
+        'Vous devez vous abonner pour accéder à ce contenu',
+        [
+          { text: 'Annuler', style: 'cancel' },
+          { text: "S'abonner", onPress: () => handleSubscription() }
+        ]
+      );
+      return;
+    }
 
-    Alert.alert(
-      'Connexion requise',
-      messages[type] || messages.access,
-      [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Se connecter', 
-          onPress: () => router.push({
-            pathname: '/loginStudent',
-            params: { 
-              redirectTo: targetScreen, 
-              itemId: item.id,
-              actionType: type
-            }
-          }) 
-        }
-      ],
-      { cancelable: false }
-    );
+    if (targetScreen) {
+      router.push({
+        pathname: targetScreen,
+        params: { ...item, isSubscribed }
+      });
+    }
   };
 
+  const handleSubscription = async () => {
+    if (!isLoggedIn) {
+      router.push({
+        pathname: '/loginStudent',
+        params: { 
+          redirectTo: 'checkout', 
+          itemId: course.id 
+        }
+      });
+      return;
+    }
 
-  // const handleViewDocument = (doc) => {
-  //   if (!isLoggedIn) {
-  //     handlePress(doc, { 
-  //       type: 'support', 
-  //       resourceName: doc.title,
-  //       targetScreen: 'pdfviewer'
-  //     });
-  //     return;
-  //   }
+    router.push({
+      pathname: '/checkout',
+      params: {
+        id: course.id,
+        title: course.title,
+        price: course.price,
+        professor: course.professor,
+        thumbnail: course.thumbnail,
+        userId: user?.id 
+      }
+    });
+  };
 
-  //   //for dummy
-  //   const pdfUrl = 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf';
-    
-  //   router.push({
-  //     pathname: 'pdfviewer',
-  //     params: { 
-  //       title: doc.title,
-  //       url: doc.url || pdfUrl, 
-  //       type: doc.type || 'pdf'  
-  //     }
-  //   });
-  // };
-
-
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -200,10 +231,11 @@ const CourseScreenDetails = () => {
       </View>
 
       <View style={styles.courseInfo}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',marginBottom: 6 , flex: 1 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flex: 1 }}>
           <Text style={styles.title}>{course.title}</Text>
-          <Text style={[styles.price, { fontFamily: 'IBM Plex Sans' , fontWeight: 'bold'}]}>{course.price} MAD</Text>
+          <Text style={[styles.price, { fontFamily: 'IBM Plex Sans', fontWeight: 'bold'}]}>{course.price} MAD</Text>
         </View>
+        
         <View style={styles.ratingContainer}>
           <Text style={styles.ratingText}>{course.rating}</Text>
           {renderStars(course.rating)}
@@ -212,16 +244,31 @@ const CourseScreenDetails = () => {
         </View>
 
         <View style={styles.teacherSection}>
-          <TouchableOpacity style={styles.teacherInfo} onPress={() => router.push('/profProfile')}>
-            <Image source={require('../assets/img/prof.png')} style={styles.profImage} />
+          <TouchableOpacity 
+            style={styles.teacherInfo} 
+            onPress={() => router.push({
+              pathname: '/profProfile',
+              params: { profId: course.professor?.id || '1' }
+            })}
+          >
+            <Image
+              source={!imageProfError && course.professor?.imageUrl ? { uri: course.professor.imageUrl } : require('../assets/img/anonyme.jpeg')}
+              defaultSource={require('../assets/img/anonyme.jpeg')}
+              style={styles.profImage}
+              onError={() => setImageProfError(true)}
+            />
+            
             <Text style={styles.profName}>{course.professor?.firstName} {course.professor?.lastName}</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.subscribeBtn}
-            onPress={() => handlePress(course, { type: 'subscription', targetScreen: 'checkout' })}
-          >
-            <Text style={styles.subscribeText}>S'inscrire</Text>
-          </TouchableOpacity>
+          
+          {!isSubscribed && (
+            <TouchableOpacity 
+              style={styles.subscribeBtn}
+              onPress={() => handleAction(course, 'subscription', 'checkout')}
+            >
+              <Text style={styles.subscribeText}>S'inscrire</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -229,14 +276,12 @@ const CourseScreenDetails = () => {
         <Text style={styles.descriptionTitle}>Description</Text>
         <Text style={styles.descriptionText}>{course.description}</Text>
         <View style={styles.descriptionDates}>
-          {course.dates &&
-            course.dates.map((d, idx) => (
-              <Text style={styles.sessions}  key={idx}>
-                {d.day.padEnd(12, " ")}  {d.time}
-              </Text>
-            ))}
+          {course.dates && course.dates.map((d, idx) => (
+            <Text style={styles.sessions} key={idx}>
+              {d.day.padEnd(12, " ")}  {d.time}
+            </Text>
+          ))}
         </View>
-
       </View>
 
       <View style={styles.section}>
@@ -245,19 +290,17 @@ const CourseScreenDetails = () => {
           {seances.map((seance) => (
             <TouchableOpacity 
               key={seance.id} 
-              style={styles.seanceCard}
-              onPress={() => handlePress(seance, {
-                type: 'seance',
-                resourceName: seance.title,
-                targetScreen: 'seance'
-              })}
+              style={[
+                styles.seanceCard,
+                !isSubscribed && styles.disabledCard
+              ]}
+              onPress={() => handleAction(seance, 'seance', 'seance')}
+              disabled={!isSubscribed}
             >
               <View style={styles.seanceImageContainer}>
                 <Image source={seance.img} style={styles.seanceImage} />
-                {/* <Text style={styles.seanceNumber}>Séance {seance.id}</Text> */}
               </View>
               <View style={styles.seanceContent}>
-                
                 <View style={styles.seanceFooter}>
                   <Text style={styles.seanceTitle}>{seance.title}</Text>
                   <Text style={styles.seanceDuration}>{seance.duration}</Text>
@@ -273,15 +316,15 @@ const CourseScreenDetails = () => {
         <Text style={styles.sectionTitle}>Support de cours</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {seances.flatMap(seance => 
-            seance.documents?.map((doc, index) => (
+            seance.documents?.map((doc) => (
               <TouchableOpacity
                 key={`${seance.id}-${doc.id}`}
-                onPress={() => handlePress(doc,{
-                  type: 'support',
-                  resourceName: doc.title,
-                  targetScreen: 'pdfviewer'
-                })}
-                style={styles.supportCard}
+                style={[
+                  styles.supportCard,
+                  !isSubscribed && styles.disabledCard
+                ]}
+                onPress={() => handleAction(doc, 'document', 'pdfvoir')}
+                disabled={!isSubscribed}
               >
                 <View style={{ alignItems: 'center', justifyContent: 'center' }}>
                   <MaterialIcons
@@ -298,35 +341,32 @@ const CourseScreenDetails = () => {
         </ScrollView>
       </View>
 
-      <TouchableOpacity 
-        style={styles.testButton}
-        onPress={() => router.replace({
-          pathname: 'pdfviewer',
-          params: {
-            title: 'Test PDF',
-            url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf'
-          }
-        })}
-      >
-        <Text style={styles.testButtonText}>TEST PDF VIEWER</Text>
-      </TouchableOpacity>
+      {/* Students Section */}
+      {isSubscribed && students.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Étudiants inscrits</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {students.map(student => (
+              <View key={student.id} style={styles.studentItem}>
+                <Image
+                  source={!imageError && student.avatar ? { uri: student.avatar } : require('../assets/img/anonyme.jpeg')}
+                  defaultSource={require('../assets/img/anonyme.jpeg')}
+                  style={styles.studentAvatar}
+                  onError={() => setImageError(true)}
+                />
+                <Text style={styles.studentName} numberOfLines={1}>
+                  {student.name}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      )}
     </ScrollView>
   );
 };
-export default CourseScreenDetails;
 
 const styles = StyleSheet.create({
-  testButton: {
-    backgroundColor: 'blue',
-    padding: 15,
-    margin: 20,
-    borderRadius: 5,
-    alignItems: 'center'
-  },
-  testButtonText: {
-    color: 'white',
-    fontWeight: 'bold'
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
@@ -350,7 +390,6 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: 'bold',
-
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -381,13 +420,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    
   },
   profImage: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderColor:'rgba(0,0,0,0.5)',
+    borderColor: 'rgba(0,0,0,0.5)',
     borderWidth: 1,
     marginRight: 8,
   },
@@ -404,20 +442,14 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   descriptionBox: {
-    // padding: 16,
     marginHorizontal: 12,
     backgroundColor: '#F3F6F8',
     borderRadius: 8,
     marginBottom: 10,
   },
-  sectionTitle: {
-    fontFamily: 'Roboto-Bold',
-    fontSize: 18,
-    paddingVertical: 12,
-  },
   descriptionTitle: {
-    fontFamily: 'Roboto-Bold',
     fontSize: 18,
+    fontWeight: 'bold',
     paddingVertical: 9,
     paddingHorizontal: 9,
   },
@@ -430,11 +462,15 @@ const styles = StyleSheet.create({
   descriptionDates: {
     paddingHorizontal: 9,
     paddingBottom: 8,
-
   },
   section: {
-    paddingHorizontal:16,
+    paddingHorizontal: 16,
     paddingVertical: 12
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
   },
   seanceCard: {
     width: 160,
@@ -443,6 +479,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
     marginBottom: 10,
+  },
+  disabledCard: {
+    opacity: 0.6,
   },
   seanceImageContainer: {
     height: 100,
@@ -453,40 +492,20 @@ const styles = StyleSheet.create({
     height: '100%',
     resizeMode: 'cover',
   },
-  seanceNumber: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    color: 'white',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
-    fontSize: 12,
-  },
   seanceContent: {
     paddingVertical: 8,
     paddingHorizontal: 6
   },
   seanceTitle: {
-    font: 'bold',
+    fontWeight: 'bold',
     fontSize: 14,
     marginBottom: 4,
   },
-  seanceSubtitle: {
+  seanceDuration: {
     fontSize: 12,
     color: '#666',
-    marginBottom: 8,
-  },
-  seanceFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
   },
   seanceDate: {
-    fontSize: 12,
-    color: '#666',
-  },
-  seanceDuration: {
     fontSize: 12,
     color: '#666',
   },
@@ -497,12 +516,35 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#F3F6F8',
     borderRadius: 8,
-    
   },
   supportText: {
     fontSize: 12,
     textAlign: 'center',
     marginTop: 4,
+  },
+  studentItem: {
+    alignItems: 'center',
+    marginRight: 15,
+    width: 80,
+  },
+  studentAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 50,
+    marginBottom: 5,
+  },
+  studentName: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  studentsList: {
+    paddingHorizontal: 15,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 });
 
+export default CourseScreenDetails;

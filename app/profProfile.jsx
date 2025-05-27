@@ -3,7 +3,7 @@ import { View, Text, Image, FlatList, TouchableOpacity, StyleSheet, ScrollView, 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import axios from 'axios';
 import CourseCard from '../components/courseCard';
-import { MaterialIcons, FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialIcons,  MaterialCommunityIcons } from '@expo/vector-icons';
 
 const ProfProfile = () => {
   const router = useRouter();
@@ -83,7 +83,7 @@ const ProfProfile = () => {
 
     const api = axios.create({
       baseURL: API_URL,
-      timeout: 10000,
+      timeout: 100,
       headers: {
       }
     });
@@ -127,7 +127,7 @@ const ProfProfile = () => {
     <TouchableOpacity 
       style={styles.resourceItem}
       onPress={() => router.push({
-        pathname: "/documentViewer",
+        pathname: "/pdfvoir",
         params: { documentUrl: item.url, documentTitle: item.title }
       })}
     >

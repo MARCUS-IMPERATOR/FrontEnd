@@ -13,7 +13,6 @@ const CheckoutScreen = () => {
     professor: professor.lastname || "Pr. Laaouani" ,
     price: price || 350.0,
     thumbnail:  require('../assets/img/hq720.jpg')
-    // thumbnail ? { uri: thumbnail.toString() } :
   };
 
   const handlePayment = () => {

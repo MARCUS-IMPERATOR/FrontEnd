@@ -1,37 +1,52 @@
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [authState, setAuthState] = useState({
+    isLoggedIn: false,
+    isLoading: true,
+    user: null
+  });
+
 
   useEffect(() => {
-    // Check if user is logged in on app start
-    const checkLoginStatus = async () => {
-      const userEmail = await AsyncStorage.getItem('userEmail');
-      setIsLoggedIn(!!userEmail);
-      setIsLoading(false);
+    const loadUser = async () => {
+      const userData = await AsyncStorage.getItem('userData');
+      if (userData) {
+        setAuthState({
+          isLoggedIn: true,
+          isLoading: false,
+          user: JSON.parse(userData)
+        });
+      } else {
+        setAuthState(prev => ({ ...prev, isLoading: false }));
+      }
     };
-    checkLoginStatus();
+    loadUser();
   }, []);
 
-  const login = async (email, password) => {
-    await AsyncStorage.setItem('userEmail', email);
-    await AsyncStorage.setItem('userPassword', password);
-    setIsLoggedIn(true);
+  const login = async (userData) => {
+    await AsyncStorage.setItem('userData', JSON.stringify(userData));
+    setAuthState({
+      isLoggedIn: true,
+      isLoading: false,
+      user: userData
+    });
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('userEmail');
-    await AsyncStorage.removeItem('userPassword');
-    setIsLoggedIn(false);
+    await AsyncStorage.removeItem('userData');
+    setAuthState({
+      isLoggedIn: false,
+      isLoading: false,
+      user: null
+    });
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ ...authState, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

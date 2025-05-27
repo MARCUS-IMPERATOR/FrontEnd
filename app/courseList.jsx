@@ -147,8 +147,23 @@ const ListCourses = () => {
 
       <FlatList
         data={courses}
-        renderItem={renderCourse}
-        keyExtractor={(_, i) => i.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity 
+            onPress={() => router.push({
+              pathname: "/course",
+              params: { 
+                courseId: item.id,
+                title: item.title,
+                professor: JSON.stringify(item.professor),
+                price: item.price,
+                thumbnail: item.thumbnail?.uri || null
+              }
+            })}
+          >
+            {renderCourse({ item })}
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item.id.toString()}
         ListEmptyComponent={
           <Text style={styles.catText}>
             Aucun cours ne correspond à votre recherche

@@ -75,7 +75,7 @@ const ViewAll = () => {
           throw new Error('No data received');
         }
       } catch (error) {
-        // Use dummy data when API fails
+        // dummy data 
         setData(DUMMY_DATA[section] || []);
         setApiFailed(true);
       } finally {
@@ -121,7 +121,7 @@ const ViewAll = () => {
       <Text style={styles.title}>{getTitle()}</Text>
       {apiFailed && (
         <Text style={styles.warningText}>
-          Données de démonstration (le serveur n'est pas disponible)
+          Données de démonstration 
         </Text>
       )}
       
